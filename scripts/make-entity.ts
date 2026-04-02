@@ -29,11 +29,11 @@ if (fs.existsSync(entityDir)) {
 }
 
 const routesTemplate = `import { Router } from "express";
-import verifyToken from "../../global/middlewares/verify-access-token";
+import { get${EntityName} } from "./controller.js";
 
 const router = Router();
 
-router.get("/", verifyToken);
+router.get("/", get${EntityName});
 
 export default router;
 `;
@@ -48,7 +48,7 @@ export default ${EntityName}Service;
 `;
 
 const controllerTemplate = `import { Request, Response, NextFunction } from "express";
-import { HTTP_STATUS } from "../../global/constants/http-status-codes";
+import { HTTP_STATUS } from "../../global/constants/http-status-codes.js";
 
 export const get${EntityName} = async (
   req: Request<object, object, object>,
@@ -84,7 +84,7 @@ if (fs.existsSync(routesFilePath)) {
   const routeVarName = `${EntityName}Routes`;
   const routePath = pluralize(entityName);
 
-  const importLine = `import ${routeVarName} from "./Entities/${EntitiesName}/routes";`;
+  const importLine = `import ${routeVarName} from "./Entities/${EntitiesName}/routes.js";`;
   const useLine = `router.use("/${routePath}", ${routeVarName});`;
 
   if (!routesFile.includes(importLine)) {

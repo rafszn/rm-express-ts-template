@@ -6,12 +6,12 @@ import Routes from "./Routes.js";
 import compression from "compression";
 import cookieParser from "cookie-parser";
 import express, { Application } from "express";
-import limiter from "./global/middlewares/rate-limiter.js";
 import corsOptions from "./global/constants/cors-options.js";
 import requestLogger from "./global/middlewares/request-logger.js";
 import { notFoundHandler } from "./global/middlewares/not-found.js";
 import { errorHandler } from "./global/middlewares/error-handler.js";
 import { HTTP_STATUS } from "./global/constants/http-status-codes.js";
+import { globalRateLimiter } from "./global/middlewares/rate-limiter.js";
 
 export default class App {
   public app: Application;
@@ -30,7 +30,7 @@ export default class App {
     this.app.use(express.json({ limit: "1mb" }));
     this.app.use(express.urlencoded({ extended: true, limit: "1mb" }));
     this.app.use(requestLogger);
-    this.app.use(limiter);
+    this.app.use(globalRateLimiter);
     this.app.use(express.static("public"));
 
     // health check, 

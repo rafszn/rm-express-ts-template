@@ -1,0 +1,52 @@
+import { z } from "zod";
+import dotenv from "dotenv";
+
+const envFile = `.env.${process.env.NODE_ENV || "development"}`;
+dotenv.config({ path: envFile });
+
+const envSchema = z.object({
+  APP_NAME: z.string().default("platform-api"),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
+  PORT: z
+    .string()
+    .transform((s) => parseInt(s, 10))
+    .default(5000),
+
+  /* ---------- mongo ---------- */
+  MONGO_URL: z.string().optional(),
+
+  /* ---------- resend ---------- */
+  RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM: z.string().optional(),
+
+  /* ---------- cloudinary ---------- */
+  CLOUDINARY_NAME: z.string().optional(),
+  CLOUDINARY_API_KEY: z.string().optional(),
+  CLOUDINARY_API_SECRET: z.string().optional(),
+});
+
+const parsed = envSchema.safeParse(process.env);
+if (!parsed.success) {
+  console.error("Environment validation failed:", parsed.error.format());
+  throw new Error("Invalid environment variables");
+}
+
+const env = parsed.data;
+
+export const cfg = {
+  NODE_ENV: env.NODE_ENV,
+  PORT: Number(env.PORT),
+  APP_NAME: env.APP_NAME,
+  MONG0_URL: env.MONGO_URL,
+
+  RESEND_FROM: env.RESEND_FROM,
+  RESEND_API_KEY: env.RESEND_API_KEY,
+
+  CLOUDINARY_NAME: env.CLOUDINARY_NAME,
+  CLOUDINARY_API_KEY: env.CLOUDINARY_API_KEY,
+  CLOUDINARY_API_SECRET: env.CLOUDINARY_API_SECRET,
+} as const;
+
+export default cfg;
