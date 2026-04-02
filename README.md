@@ -12,4 +12,9 @@ This template has the following set up:
 - Centralized error handling
 - Routes structure (versioned /api/v1)
 - Dev workflow with hot reload
+- Cloudinary storage
+- Multer file upload
+- Custom headers
+- RateLimit Creation Method
+- Request Guard
 - Do remember to add .env to the .gitignore file after cloning.
