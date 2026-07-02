@@ -22,6 +22,7 @@ This template has the following set up:
 - Authenticate Middleware - Extensible
 - Custom Error Class - Extensible
 - Helper Script for Module Creation
+- Swagger Documentation bootstrap at `/docs`
 - Do remember to add .env.development to the .gitignore file after cloning.
 
 After `npm i`,

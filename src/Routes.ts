@@ -3,5 +3,5 @@ import AuthRoutes from "./core/Modules/Auth/routes.js";
 
 const router = Router();
 
-router.use("/auths", AuthRoutes);
+router.use("/auth", AuthRoutes);
 export default router;
