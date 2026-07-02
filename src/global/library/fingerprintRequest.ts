@@ -1,15 +1,20 @@
 import crypto from "crypto";
-import { Request } from "express";
 
-const fingerprintRequest = (req: Request): string => {
-  const ua = req.headers["user-agent"] ?? "";
-  const ip = req.ip ?? "";
-
-  return crypto
+const fingerprintRequest = (
+  random: string,
+): {
+  fingerprint: string;
+  fingerprintHash: string;
+} => {
+  const fingerprintHash = crypto
     .createHash("sha256")
-    .update(`${ua}:${ip}`)
-    .digest("hex")
-    .slice(0, 16);
+    .update(random)
+    .digest("hex");
+
+  return {
+    fingerprint: random,
+    fingerprintHash,
+  };
 };
 
 export default fingerprintRequest;

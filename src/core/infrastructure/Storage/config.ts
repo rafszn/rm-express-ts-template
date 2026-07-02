@@ -1,5 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
-import cfg from "../../global/environment.config.js";
+import cfg from "../../../global/environment.config.js";
 
 cloudinary.config({
   cloud_name: cfg.CLOUDINARY_NAME,

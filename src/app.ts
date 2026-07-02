@@ -10,6 +10,7 @@ import corsOptions from "./global/constants/cors-options.js";
 import requestLogger from "./global/middlewares/request-logger.js";
 import { notFoundHandler } from "./global/middlewares/not-found.js";
 import { errorHandler } from "./global/middlewares/error-handler.js";
+import { requestGuard } from "./global/middlewares/request-guard.js";
 import { HTTP_STATUS } from "./global/constants/http-status-codes.js";
 import { globalRateLimiter } from "./global/middlewares/rate-limiter.js";
 
@@ -20,7 +21,7 @@ export default class App {
   }
 
   async initialize() {
-    this.app.set("trust proxy", 1);
+    this.app.set("trust proxy", true); // req.ip
     // security middlewares
     this.app.use(helmet({ contentSecurityPolicy: false }));
     this.app.use(cors(corsOptions));
@@ -31,9 +32,10 @@ export default class App {
     this.app.use(express.urlencoded({ extended: true, limit: "1mb" }));
     this.app.use(requestLogger);
     this.app.use(globalRateLimiter);
+    this.app.use(requestGuard); // block scanners / traversal
     this.app.use(express.static("public"));
 
-    // health check, 
+    // health check,
     this.app.get("/", (req, res) => {
       res.status(HTTP_STATUS.OK).json({
         server: "SERVER_01_APP",

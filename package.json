@@ -7,12 +7,14 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/Bootstrap.ts",
-    "make:entity": "tsx scripts/make-entity.ts"
+    "make:module": "tsx scripts/make-module.ts",
+    "start": "npm run build && node dist/Bootstrap.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1078.0",
     "argon2": "^0.44.0",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
@@ -25,10 +27,14 @@
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
+    "ioredis": "^5.11.1",
     "jsonwebtoken": "^9.0.3",
+    "mime-types": "^3.0.2",
     "mongoose": "^9.0.1",
     "multer": "^2.1.1",
     "node-cron": "^4.2.1",
+    "resend": "^6.16.0",
+    "sharp": "^0.35.3",
     "streamifier": "^0.1.1",
     "winston": "^3.19.0",
     "zod": "^4.2.1"
@@ -42,6 +48,7 @@
     "@types/express": "^5.0.6",
     "@types/hpp": "^0.2.7",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/mime-types": "^3.0.1",
     "@types/multer": "^2.1.0",
     "@types/node": "^25.0.3",
     "@types/node-cron": "^3.0.11",

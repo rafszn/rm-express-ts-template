@@ -25,6 +25,17 @@ const envSchema = z.object({
   CLOUDINARY_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
+
+  /* ---------- cloudfare r2 ---------- */
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_BUCKET_NAME: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_PUBLIC_BASE_URL: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+
+  /* ---------- cache config ---------- */
+  CACHE_DRIVER: z.enum(["redis", "memory"]).default("memory"),
+  REDIS_URL: z.string().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -47,6 +58,15 @@ export const cfg = {
   CLOUDINARY_NAME: env.CLOUDINARY_NAME,
   CLOUDINARY_API_KEY: env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: env.CLOUDINARY_API_SECRET,
+
+  R2_ACCOUNT_ID: env.R2_ACCOUNT_ID,
+  R2_BUCKET_NAME: env.R2_BUCKET_NAME,
+  R2_ACCESS_KEY_ID: env.R2_ACCESS_KEY_ID,
+  R2_PUBLIC_BASE_URL: env.R2_PUBLIC_BASE_URL,
+  R2_SECRET_ACCESS_KEY: env.R2_SECRET_ACCESS_KEY,
+
+  CACHE_DRIVER: env.CACHE_DRIVER,
+  REDIS_URL: env.REDIS_URL,
 } as const;
 
 export default cfg;

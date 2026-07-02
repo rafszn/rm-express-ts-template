@@ -5,13 +5,17 @@ import path from "path";
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-const pluralize = (str: string) => (str.endsWith("s") ? str : `${str}s`);
+const pluralize = (value: string) => {
+  if (value.endsWith("s")) return value;
+  if (value.endsWith("y")) return `${value.slice(0, -1)}ies`;
+  return `${value}s`;
+};
 
 const entityArg = process.argv[2];
 
 if (!entityArg) {
-  console.error("❌ Please provide an entity name");
-  console.error("Example: npm run make:entity user");
+  console.error("❌ Please provide a module name");
+  console.error("Example: npm run make:module user");
   process.exit(1);
 }
 
@@ -20,35 +24,51 @@ const EntityName = capitalize(entityName);
 const EntitiesName = capitalize(pluralize(entityName));
 
 const rootDir = process.cwd();
-const entitiesDir = path.join(rootDir, "src", "Entities");
+const entitiesDir = path.join(rootDir, "src", "core", "Modules");
 const entityDir = path.join(entitiesDir, EntitiesName);
 
 if (fs.existsSync(entityDir)) {
-  console.error(`❌ Entity "${EntitiesName}" already exists`);
+  console.error(`❌ Module "${EntitiesName}" already exists`);
   process.exit(1);
 }
 
 const routesTemplate = `import { Router } from "express";
 import { get${EntityName} } from "./controller.js";
+import { create${entityName}Schema } from "./dto.js";
+import { validate } from "../../../global/middlewares/validator.js";
 
 const router = Router();
 
-router.get("/", get${EntityName});
+router.get("/", validate(create${entityName}Schema), get${EntityName});
 
 export default router;
 `;
 
-const serviceTemplate = `const ${EntityName}Service = {
-  create${EntityName}: async function () {
-    return true;
-  },
+const serviceTemplate = `import { cacheService } from "../../infrastructure/Cache/service.js";
+
+class ${EntityName}Service {
+private readonly ${entityName}CachePrefix = "myapp:${entityName}";
+
+ async create${EntityName} () {
+   const cacheKey = cacheService.createKey(this.${entityName}CachePrefix);
+   return cacheService.getOrSet(
+      cacheKey,
+      async () => ({
+        module: "${EntityName}",
+        status: "ready",
+      }),
+      5 * 60 * 1000,
+    );
+  }
 };
 
-export default ${EntityName}Service;
+const ${entityName}Service = new ${EntityName}Service();
+export default ${entityName}Service;
 `;
 
-const controllerTemplate = `import { Request, Response, NextFunction } from "express";
-import { HTTP_STATUS } from "../../global/constants/http-status-codes.js";
+const controllerTemplate = `import ${entityName}Service from "./service.js"
+import { Request, Response, NextFunction } from "express";
+import { HTTP_STATUS } from "../../../global/constants/http-status-codes.js";
 
 export const get${EntityName} = async (
   req: Request<object, object, object>,
@@ -56,9 +76,12 @@ export const get${EntityName} = async (
   next: NextFunction
 ) => {
   try {
+    const data = await ${entityName}Service.create${EntityName}()
+
     return res.status(HTTP_STATUS.OK).json({
       success: true,
-      message: "${entityName} fetched successfully",
+      message: "${entityName} creation successful",
+      data,
     });
   } catch (error) {
     next(error);
@@ -66,7 +89,20 @@ export const get${EntityName} = async (
 };
 `;
 
-const dtoTemplate = `// ${EntityName} DTOs go here
+const dtoTemplate = `import { z } from "zod";
+
+export const create${entityName}Schema = z.object({
+  type: z.string().min(2, "type is required"),
+});
+
+export type Create${entityName}DTO = z.infer<typeof create${entityName}Schema>;
+`;
+
+const docsTemplate = `// ${EntityName} docs go here`;
+
+const globalTypesTemplate = `export {}
+
+declare global {}
 `;
 
 fs.mkdirSync(entityDir, { recursive: true });
@@ -75,6 +111,8 @@ fs.writeFileSync(path.join(entityDir, "routes.ts"), routesTemplate);
 fs.writeFileSync(path.join(entityDir, "service.ts"), serviceTemplate);
 fs.writeFileSync(path.join(entityDir, "controller.ts"), controllerTemplate);
 fs.writeFileSync(path.join(entityDir, "dto.ts"), dtoTemplate);
+fs.writeFileSync(path.join(entityDir, "docs.ts"), docsTemplate);
+fs.writeFileSync(path.join(entityDir, "types.d.ts"), globalTypesTemplate);
 
 const routesFilePath = path.join(rootDir, "src", "Routes.ts");
 
@@ -84,7 +122,7 @@ if (fs.existsSync(routesFilePath)) {
   const routeVarName = `${EntityName}Routes`;
   const routePath = pluralize(entityName);
 
-  const importLine = `import ${routeVarName} from "./Entities/${EntitiesName}/routes.js";`;
+  const importLine = `import ${routeVarName} from "./core/Modules/${EntitiesName}/routes.js";`;
   const useLine = `router.use("/${routePath}", ${routeVarName});`;
 
   if (!routesFile.includes(importLine)) {
@@ -113,7 +151,7 @@ if (fs.existsSync(routesFilePath)) {
       // no router.use exists, insert after Router()
       routesFile = routesFile.replace(
         /const router = Router\(\);\s*/,
-        `const router = Router();\n\n${useLine}\n`
+        `const router = Router();\n\n${useLine}\n`,
       );
     }
   }
@@ -124,5 +162,5 @@ if (fs.existsSync(routesFilePath)) {
   console.warn("⚠️ src/Routes.ts not found. Skipped route registration.");
 }
 
-console.log(`✅ Entity "${EntitiesName}" created.`);
+console.log(`✅ Module "${EntitiesName}" created.`);
 console.log(`📁 Location: ${entityDir}`);

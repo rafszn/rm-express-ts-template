@@ -1,10 +1,15 @@
+import logger from "../../config.js";
 import { Request, Response } from "express";
 import { HTTP_STATUS } from "../constants/http-status-codes.js";
 
 export const notFoundHandler = (req: Request, res: Response) => {
+  logger.error({
+    message: `Method [${req.method}] | Route [${req.originalUrl}] not found`,
+    path: req.path,
+  });
   res.status(HTTP_STATUS.NOT_FOUND).json({
     success: false,
-    message: "Route not found",
+    message: `Method [${req.method}] | Route [${req.originalUrl}] not found`,
     code: "NOT_FOUND",
   });
 };

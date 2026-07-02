@@ -1,7 +1,7 @@
-import { HTTP_STATUS } from "../constants/http-status-codes.js";
-import { Response, Request, NextFunction } from "express";
 import mongoose from "mongoose";
 import logger from "../../config.js";
+import { Response, Request, NextFunction } from "express";
+import { HTTP_STATUS } from "../constants/http-status-codes.js";
 
 interface MongoDuplicateKeyError {
   code: 11000;
@@ -17,12 +17,26 @@ function isMongoDuplicateKeyError(err: unknown): err is MongoDuplicateKeyError {
   );
 }
 
+export class AppError extends Error {
+  statusCode: number;
+  isOperational: boolean;
+
+  constructor(message: string, statusCode: number) {
+    super(message);
+
+    this.statusCode = statusCode;
+    this.isOperational = true;
+
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
 export function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  next: NextFunction
+  next: NextFunction,
 ) {
   type HttpStatusCode = (typeof HTTP_STATUS)[keyof typeof HTTP_STATUS];
   let status: HttpStatusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
