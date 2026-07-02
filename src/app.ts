@@ -13,6 +13,7 @@ import { errorHandler } from "./global/middlewares/error-handler.js";
 import { requestGuard } from "./global/middlewares/request-guard.js";
 import { HTTP_STATUS } from "./global/constants/http-status-codes.js";
 import { globalRateLimiter } from "./global/middlewares/rate-limiter.js";
+import { setupSwaggerDocs } from "./docs/swagger.js";
 
 export default class App {
   public app: Application;
@@ -44,6 +45,9 @@ export default class App {
 
     // routes
     this.app.use("/v1", Routes);
+
+    //docs
+    setupSwaggerDocs(this.app);
 
     // 404 and error handler
     this.app.use(notFoundHandler);

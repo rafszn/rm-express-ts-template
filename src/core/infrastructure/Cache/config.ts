@@ -1,5 +1,5 @@
 export type CacheDriver = "memory" | "redis";
-import cfg from "../../global/environment.config.js";
+import cfg from "../../../global/environment.config.js";
 
 export const cacheConfig = {
   driver: (cfg.CACHE_DRIVER || "memory") as CacheDriver,
